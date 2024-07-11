@@ -16,7 +16,7 @@
     "url": "https://github.com/yousufredbytes/vehicle_tracking/issues"
   },
   "homepage": "https://github.com/yousufredbytes/vehicle_tracking#readme",
-  "peerDependencies": {
+  "dependencies": {
     "react": "18.1.0",
     "react-native": "0.70.6",
     "axios": "^1.7.2",
