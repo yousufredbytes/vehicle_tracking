@@ -1,6 +1,6 @@
 {
   "name": "react-native-vehicle-tracking",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "this is for react native vehicle tracking",
   "main": "index.js",
   "scripts": {
