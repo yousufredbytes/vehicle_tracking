@@ -15,9 +15,10 @@ const TrackingOrder = (
   {
     type,
     Triplist,
-    imeino,
+    socketEmit,
     userCustomerId,
-    BASE_URL 
+    BASE_URL ,
+    singleVehicle
   },
 
 ) => {
@@ -39,21 +40,27 @@ const TrackingOrder = (
   const [stopMarkers, setStopMarkers] = useState([]);
   const [route, setRoute] = useState([]);
   const initializeSocket = async () => {
-    if(socket?.connected)return
 
+    
     const newSocket = io(BASE_URL);
+    console.log("socketEmit",socketEmit)
+    console.log("socketEmit",typeof socketEmit)
+    console.log("connected",newSocket?.connected+"")
+    console.log("userCustomerId",userCustomerId)
+    console.log("BASE_URL",BASE_URL)
+    console.log("singleVehicle",singleVehicle)
     newSocket.on("connect", async () => {
-      newSocket.emit("singleVehicle", {
-        user_customer_id: userCustomerId,
-        imei: imeino,
-      });
+      console.log("connectconnectconnectconnectconnectconnect",)
+      // alert('')
+      newSocket.emit("singleVehicle", singleVehicle);
 
-      newSocket.on(`${imeino}`, (data) => {
+      newSocket.on(`${socketEmit}`, (data) => {
+        console.log("socketEmitsocket",data)
         setSocketResponse(data);
       });
 
       newSocket.on("disconnect", () => {
-        console.log("Disconnected from the socket");
+        // console.log("Disconnected from the socket");
       });
 
       setSocket(newSocket);
@@ -68,15 +75,26 @@ const TrackingOrder = (
           socket.disconnect();
         }
       };
-    }, [Triplist,socket]);
+    }, [Triplist]);
+    // }, [Triplist,socket]);
 
 
   const fetchRoute = async () => {
-    const waypoints = [
-      `${startMarker.longitude},${startMarker.latitude}`,
-      ...stopMarkers.map((marker) => `${marker.longitude},${marker.latitude}`),
-      `${endMarker.longitude},${endMarker.latitude}`,
-    ].join(";");
+    let waypoints = ''
+    // let waypoints = []
+    if(socketEmit!=''&&socketResponse?.length>0){
+       waypoints = [
+        `${parseFloat(socketResponse?.[0]?.longitude)},${parseFloat(socketResponse?.[0]?.latitude)}`,
+        ...stopMarkers.map((marker) => `${marker.longitude},${marker.latitude}`),
+        `${endMarker.longitude},${endMarker.latitude}`,
+      ].join(";");
+    }else{
+       waypoints = [
+        `${startMarker.longitude},${startMarker.latitude}`,
+        ...stopMarkers.map((marker) => `${marker.longitude},${marker.latitude}`),
+        `${endMarker.longitude},${endMarker.latitude}`,
+      ].join(";");
+    }
     const url = `http://router.project-osrm.org/route/v1/driving/${waypoints}?overview=full&geometries=geojson`;
     try {
       const response = await axios.get(url);
@@ -94,7 +112,7 @@ const TrackingOrder = (
 
   useEffect(() => {
     fetchRoute();
-  }, [startMarker, endMarker, stopMarkers]);
+  }, [startMarker, endMarker, stopMarkers,socketResponse]);
 
   const addMarker = (e) => {
     if (type === "add") {
@@ -144,7 +162,7 @@ const TrackingOrder = (
   };
   //   console.log(socketResponse[0]?.latitude, 'thisSocketslat');
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <MapView
         style={styles.map}
         initialRegion={
@@ -177,6 +195,7 @@ const TrackingOrder = (
                 ],
               }}
             >
+     
               <SvgUri
                 uri={`${BASE_URL}/uploads/vehicle_type/${
                   socketResponse[0]?.vehicle_type_id
