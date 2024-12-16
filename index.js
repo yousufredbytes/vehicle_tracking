@@ -106,7 +106,7 @@ const TrackingOrder = (
       );
       setRoute(coordinates);
     } catch (error) {
-      Alert.alert("Error", "Failed to fetch route");
+      // Alert.alert("Error", "Failed to fetch route");
     }
   };
 
